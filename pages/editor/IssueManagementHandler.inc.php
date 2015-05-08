@@ -14,6 +14,7 @@
  */
 
 import('pages.editor.EditorHandler');
+//import ('classes.issue.Issue');
 
 class IssueManagementHandler extends EditorHandler {
 	/** issue associated with the request **/
@@ -627,6 +628,40 @@ class IssueManagementHandler extends EditorHandler {
 		$templateMgr->addJavaScript('lib/pkp/js/lib/jquery/plugins/jquery.tablednd.js');
 		$templateMgr->addJavaScript('lib/pkp/js/functions/tablednd.js');
 
+
+
+    ///*
+$issueId = (int) array_shift($args);
+		$this->validate($issueId, true);
+		$issue =& $this->issue;
+		$this->setupTemplate(EDITOR_SECTION_ISSUES);
+
+		$templateMgr =& TemplateManager::getManager();
+		import('classes.issue.IssueAction');
+		$templateMgr->assign('issueOptions', IssueAction::getIssueOptions());
+
+		import('classes.issue.form.IssueForm');
+
+		if (checkPhpVersion('5.0.0')) { // WARNING: This form needs $this in constructor
+			$issueForm = new IssueForm('editor/issues/issueToc.tpl');
+		} else {
+			$issueForm =& new IssueForm('editor/issues/issueToc.tpl');
+		}
+
+		if ($issueForm->isLocaleResubmit()) {
+			$issueForm->readInputData();
+		} else {
+			$issueId = $issueForm->initData($issueId);
+		}
+		$templateMgr->assign('issueId', $issueId);
+
+		$templateMgr->assign_by_ref('issue', $issue);
+		//$templateMgr->assign('unpublished',!$issue->getPublished());
+		$templateMgr->assign('helpTopicId', 'publishing.index');
+		$issueForm->display();
+    //*/
+
+
 		$templateMgr->display('editor/issues/issueToc.tpl');
 	}
 
@@ -896,6 +931,34 @@ class IssueManagementHandler extends EditorHandler {
 		$this->validate($issueId);
 		$issue =& $this->issue;
 
+    
+     //
+		$templateMgr =& TemplateManager::getManager();
+		import('classes.issue.IssueAction');
+		$templateMgr->assign('issueOptions', IssueAction::getIssueOptions());
+
+		import('classes.issue.form.IssueForm');
+
+		if (checkPhpVersion('5.0.0')) { // WARNING: This form needs $this in constructor
+			$issueForm = new IssueForm('editor/issues/issueToc.tpl');
+		} else {
+			$issueForm =& new IssueForm('editor/issues/issueToc.tpl');
+		}
+
+		if ($issueForm->isLocaleResubmit()) {
+			$issueForm->readInputData();
+		} else {
+			$issueId = $issueForm->initData($issueId);
+		}
+		$templateMgr->assign('issueId', $issueId);
+
+		$templateMgr->assign_by_ref('issue', $issue);
+		$templateMgr->assign('unpublished',!$issue->getPublished());
+		$templateMgr->assign('helpTopicId', 'publishing.index');
+		$issueForm->display();
+      
+    /**/
+
 		$journal =& $request->getJournal();
 		$journalId = $journal->getId();
 
@@ -926,7 +989,37 @@ class IssueManagementHandler extends EditorHandler {
 				$tombstoneDao =& DAORegistry::getDAO('DataObjectTombstoneDAO');
 				$tombstoneDao->deleteByDataObjectId($article->getId());
 				unset($article);
+        
+        
 			}
+      
+      //
+      
+
+      
+    require_once('lib/tcpdf/tcpdf.php'); //$_SERVER['DOCUMENT_ROOT'].
+    require_once('fpdi.php'); //$_SERVER['DOCUMENT_ROOT'].
+            
+            //global $fullPathToFile;
+            //$pdf->fullPathToFile = "TestClanek.pdf";
+    require('class.php');
+              
+                    // initiate PDF
+                    $pdf = new PDF();
+                    $pdf->fullPathToFile = "c:/xampp/htdocs/ojs245/pages/editor/TestClanek.pdf";
+                    if($pdf->numPages>0) {
+                        for($i=1;$i<=$pdf->numPages;$i++) {
+                            $pdf->endPage();
+                            $pdf->_tplIdx = $pdf->importPage($i);
+                            $pdf->AddPage();
+                        }
+                    }
+                        $file_time = time();
+                        
+                        $pdf->Output("$file_time.pdf", "F");//, "I"); 
+                        echo "Link - edited PDF: '<a href=$file_time.pdf>Edited file</a>'";
+                        
+    //  
 		}
 
 		$issue->setCurrent(1);
@@ -1012,6 +1105,12 @@ class IssueManagementHandler extends EditorHandler {
 			$articleTombstoneManager->insertArticleTombstone($article, $journal);
 		}
 		$request->redirect(null, null, 'futureIssues');
+    
+                          
+    
+    
+    
+    
 	}
 
 	/**
